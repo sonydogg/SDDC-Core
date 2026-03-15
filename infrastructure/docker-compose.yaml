@@ -12,6 +12,7 @@ services:
       - P4PORT=1666
       - P4USER=admin
       - P4PASSWD_FILE=/run/secrets/p4_admin_pass
+      - P4NAME=mini-me-p4d  # This sets the ServerID
     volumes:
       - /mnt/stones/earth/p4data:/data
       - /mnt/stones/water/p4depots:/data/depots
