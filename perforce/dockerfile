@@ -1,0 +1,30 @@
+FROM ubuntu:noble
+
+# Prevent interactive prompts during install
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 1. Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    ca-certificates
+
+# 2. Add Perforce GPG key and Repository
+RUN wget -qO - https://package.perforce.com/perforce.pubkey | gpg --dearmor -o /usr/share/keyrings/perforce.gpg
+RUN echo "deb [signed-by=/usr/share/keyrings/perforce.gpg] https://package.perforce.com/apt/ubuntu noble release" > /etc/apt/sources.list.d/perforce.list
+
+# 3. Install Helix Core Server (p4d)
+RUN apt-get update && apt-get install -y helix-p4d
+
+# 4. Configure Environment
+EXPOSE 1666
+ENV P4ROOT=/p4data
+ENV P4PORT=1666
+
+# Ensure the data volume exists
+RUN mkdir -p /p4data
+VOLUME /p4data
+
+# Start the server
+# Update the CMD to the exact versioned path you found
+CMD ["/opt/perforce/sbin/p4d.25.2", "-r", "/p4data", "-p", "1666"]

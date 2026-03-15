@@ -1,0 +1,22 @@
+#cloud-config
+autoinstall:
+  version: 1
+  interactive-sections: []
+  identity:
+    hostname: 
+    username: 
+    realname: 
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  network:
+    version: 2
+    ethernets:
+      enp4s0:
+        dhcp4: true
+  storage:
+    layout:
+      name: direct
+  ssh:
+    install-server: true
+  terminate: reboot

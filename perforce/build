@@ -1,0 +1,11 @@
+# Build with the new name
+sudo docker build -t perforce-p4:v25.2 .
+
+# Launch with the new branding
+sudo docker run -d \
+  --name perforce-p4 \
+  --restart always \
+  -p 1666:1666 \
+  -v /mnt/stones/earth:/p4data \
+  -e P4NAME=mini-me-p4 \
+  perforce-p4:v25.2
