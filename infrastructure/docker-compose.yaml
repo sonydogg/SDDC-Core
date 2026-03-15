@@ -54,3 +54,17 @@ services:
     volumes:
       - /mnt/stones/earth/n8n_db_data:/var/lib/postgresql/data
       - ./secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
+  # The Front Door (Nginx Proxy Manager)
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: sddc-proxy
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'   # Admin UI for the Proxy
+      - '443:443'
+    volumes:
+      - /mnt/stones/wind/proxy_data:/data
+      - /mnt/stones/wind/proxy_letsencrypt:/etc/letsencrypt
+    depends_on:
+      - n8n
