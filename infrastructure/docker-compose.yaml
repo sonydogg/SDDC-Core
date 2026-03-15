@@ -31,7 +31,6 @@ services:
       - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
-      - N8N_SECURE_COOKIE=false
       # n8n looks for this specific env var for file-based secrets
       - DB_POSTGRESDB_PASSWORD_FILE=/run/secrets/n8n_db_pass
       - N8N_ENCRYPTION_KEY_FILE=/run/secrets/n8n_encryption_key
