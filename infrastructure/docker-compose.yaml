@@ -69,3 +69,11 @@ services:
       - /mnt/stones/wind/proxy_letsencrypt:/etc/letsencrypt
     depends_on:
       - n8n
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: sddc-tunnel
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    command: tunnel --no-autoupdate run
