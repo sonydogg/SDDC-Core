@@ -1,3 +1,8 @@
+---
+title: Privacy Policy
+layout: default
+---
+
 # Privacy Policy for SDDC-Core Automation
 
 **Last Updated:** March 16, 2026
