@@ -31,3 +31,7 @@ This repository utilizes an **n8n-powered Agent** to manage architectural record
 ├── config/             # Wind-tier service configurations
 ├── scripts/            # Automation and health monitoring
 └── README.md           # Project Command Center
+
+## Privacy Statement
+---
+[Privacy Policy](https://sonydogg.github.io/SDDC-Core/privacy)
