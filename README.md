@@ -1,6 +1,6 @@
 ---
 title: SDDC-Core Home
-google-site-verification: <meta name="google-site-verification" content="9OfFC293NtOaRb--65jjny1dNHLjDQRiGR3NVm8ZECg" />
+google-site-verification: "9OfFC293NtOaRb--65jjny1dNHLjDQRiGR3NVm8ZECg"
 ---
 
 # SDDC-Core: Software Defined Data Center Framework
