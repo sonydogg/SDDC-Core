@@ -1,8 +1,3 @@
----
-title: SDDC-Core Home
-google-site-verification: "9OfFC293NtOaRb--65jjny1dNHLjDQRiGR3NVm8ZECg"
----
-
 # SDDC-Core: Software Defined Data Center Framework
 
 Building a production-grade, governed infrastructure on an Intel Mini cluster using GitOps, Home Automation, and AI-driven documentation.
