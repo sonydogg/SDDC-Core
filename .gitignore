@@ -6,6 +6,7 @@ secrets.txt
 # Ignore OS files
 .DS_Store
 Thumbs.db
+.p4config*
 
 # Ignore local temporary files
 *.tmp
