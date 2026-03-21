@@ -4,6 +4,7 @@
 earth/*
 secrets/*
 .env*
+.git*
 
 
 # Ignore n8n runtime data (The Living Data)
