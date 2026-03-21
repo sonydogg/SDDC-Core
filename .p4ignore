@@ -1,0 +1,16 @@
+# Add these to /mnt/stones/.p4ignore
+.p4config
+.p4ignore
+earth/*
+secrets/*
+.env*
+
+
+# Ignore n8n runtime data (The Living Data)
+n8n_data*
+proxy_data*
+proxy_letsencrypt*
+
+# Ignore OS/Editor junk
+.DS_Store
+.vscode/

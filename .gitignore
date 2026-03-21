@@ -1,7 +1,11 @@
 # Ignore secrets and env files
 *.env
 .env*
-secrets.txt
+secrets/
+
+# Ignore Docker Container Volumes
+n8n*
+proxy*
 
 # Ignore OS files
 .DS_Store
@@ -11,3 +15,15 @@ Thumbs.db
 # Ignore local temporary files
 *.tmp
 *.log
+
+# Ignore build and distribution files
+dist/
+build/
+*.egg-info/
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+
+#Ignore Large Binary Files
+*.iso
