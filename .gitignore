@@ -26,4 +26,4 @@ build/
 .idea/
 
 #Ignore Large Binary Files
-*.iso
+*.isol
