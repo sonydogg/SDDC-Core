@@ -8,20 +8,18 @@ services:
     restart: always
     ports:
       - "1666:1666"
-    environment:
-      - P4PORT=1666
-      - P4USER=admin
-      - P4D_SUPER_PASSWD=/run/secrets/p4_admin_pass
-      - PERFORCE_UID=1000
-      - PERFORCE_GID=1000
+    #environment:
+      #- P4PORT=1666
+      #- P4USER=admin
+      #- P4D_SUPER_PASSWD=/run/secrets/p4_admin_pass
+      #- PERFORCE_UID=1000
+      #- PERFORCE_GID=1000
     volumes:
           # Earth Stone: The Librarian's Brain (DB, Logs, License)
           - /mnt/stones/earth/p4data:/p4data
-    
           # Water Stone: The Librarian's Vault (Actual Files/Depots)
           # Note: We map this to a separate root folder in the container
           - /mnt/stones/water/p4depots:/depots
-          
           # Secrets
           - /mnt/stones/wind/secrets/p4_admin_pass:/run/secrets/p4_admin_pass:ro
   # The Automation Brain
