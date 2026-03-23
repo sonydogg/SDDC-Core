@@ -95,26 +95,26 @@ services:
       - /mnt/stones/earth/maas_db:/var/lib/postgresql/data
       - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
 # SDDC's MAAS Server (Requires the DB)
-  maas:
-    image: canonical/maas:latest
-    container_name: sddc-maas
-    restart: always
-    environment:
-      - MAAS_DBHOST=maas-db  # Point to the internal DB service
-      - MAAS_DBUSER=maas
-      - MAAS_DBPASS_FILE=/run/secrets/maas_db_pass
-      - MAAS_DBNAME=maas
-    depends_on:
-      - maas-db
-    volumes:
-      - /mnt/stones/water/maas_images:/var/lib/maas/boot-resources
-      - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
-    networks:
-      default:           # Connect to the internal bridge for DB access/Internet
-      imaging_vlan60:    # Connect to the physical wire for PXE/DHCP
-        ipv4_address: 192.168.60.2
-    ports:
-      - "5240:5240"
+#  maas:
+#    image: canonical/maas:latest
+#    container_name: sddc-maas
+#    restart: always
+#    environment:
+#      - MAAS_DBHOST=maas-db  # Point to the internal DB service
+#      - MAAS_DBUSER=maas
+#      - MAAS_DBPASS_FILE=/run/secrets/maas_db_pass
+#      - MAAS_DBNAME=maas
+#    depends_on:
+#      - maas-db
+#    volumes:
+#      - /mnt/stones/water/maas_images:/var/lib/maas/boot-resources
+#      - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
+#    networks:
+#      default:           # Connect to the internal bridge for DB access/Internet
+#      imaging_vlan60:    # Connect to the physical wire for PXE/DHCP
+#        ipv4_address: 192.168.60.2
+#    ports:
+#      - "5240:5240"
 networks:
   imaging_vlan60:
     driver: macvlan
