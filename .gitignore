@@ -2,6 +2,7 @@
 *.env
 .env*
 secrets/
+.p4ignore
 
 # Ignore Docker Container Volumes
 n8n*

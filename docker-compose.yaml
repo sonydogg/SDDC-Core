@@ -44,7 +44,7 @@ services:
     depends_on:
       - n8n-db
     volumes:
-      - /mnt/stones/wind/n8n_data:/home/node/.n8n
+      - /mnt/stones/earth/n8n_data:/home/node/.n8n
       - /mnt/stones/wind/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
       - /mnt/stones/wind/secrets/n8n_encryption_key:/run/secrets/n8n_encryption_key:ro
 
@@ -71,8 +71,8 @@ services:
       - '81:81'   # Admin UI for the Proxy
       - '443:443'
     volumes:
-      - /mnt/stones/wind/proxy_data:/data
-      - /mnt/stones/wind/proxy_letsencrypt:/etc/letsencrypt
+      - /mnt/stones/earth/proxy_data:/data
+      - /mnt/stones/earth/proxy_letsencrypt:/etc/letsencrypt
     depends_on:
       - n8n
   # The Tunnel (Cloudflared) for accesss from outside the SDDC
@@ -109,7 +109,7 @@ services:
     depends_on:
       - maas-db
     volumes:
-      - /mnt/stones/water/p4depots/maas_images:/var/lib/maas/boot-resources
+      - /mnt/stones/water/maas_images:/var/lib/maas/boot-resources
       - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
     networks:
       default:           # Connect to the internal bridge for DB access/Internet
