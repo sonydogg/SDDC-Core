@@ -28,3 +28,7 @@ build/
 
 #Ignore Large Binary Files
 *.isol
+# Ignore Terraform State Files
+*.tfstate
+*.tfstate.backup
+terraform.tfvars
