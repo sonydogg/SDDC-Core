@@ -3,8 +3,6 @@
 .env*
 secrets/
 .p4ignore
-user-data*
-network-config*
 
 # Ignore Docker Container Volumes
 n8n*

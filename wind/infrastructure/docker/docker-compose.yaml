@@ -21,7 +21,7 @@ services:
           # Note: We map this to a separate root folder in the container
           - /mnt/stones/water/p4depots:/depots
           # Secrets
-          - /mnt/stones/wind/secrets/p4_admin_pass:/run/secrets/p4_admin_pass:ro
+          - /mnt/stones/wind/infrastructure/docker/secrets/p4_admin_pass:/run/secrets/p4_admin_pass:ro
   # The Automation Brain
   n8n:
     image: n8nio/n8n:latest
@@ -43,8 +43,8 @@ services:
       - n8n-db
     volumes:
       - /mnt/stones/earth/n8n_data:/home/node/.n8n
-      - /mnt/stones/wind/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
-      - /mnt/stones/wind/secrets/n8n_encryption_key:/run/secrets/n8n_encryption_key:ro
+      - /mnt/stones/wind/infrastructure/docker/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
+      - /mnt/stones/wind/infrastructure/docker/secrets/n8n_encryption_key:/run/secrets/n8n_encryption_key:ro
 
   # The Memory (Postgres)
   n8n-db:
@@ -58,7 +58,7 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/n8n_db_pass
     volumes:
       - /mnt/stones/earth/n8n_db_data:/var/lib/postgresql/data
-      - /mnt/stones/wind/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
+      - /mnt/stones/wind/infrastructure/docker/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
   # The Front Door (Nginx Proxy Manager)
   nginx-proxy:
     image: 'jc21/nginx-proxy-manager:latest'
@@ -93,28 +93,23 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/maas_db_pass
     volumes:
       - /mnt/stones/earth/maas_db:/var/lib/postgresql/data
-      - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
-# SDDC's MAAS Server (Requires the DB)
-#  maas:
-#    image: canonical/maas:latest
-#    container_name: sddc-maas
-#    restart: always
-#    environment:
-#      - MAAS_DBHOST=maas-db  # Point to the internal DB service
-#      - MAAS_DBUSER=maas
-#      - MAAS_DBPASS_FILE=/run/secrets/maas_db_pass
-#      - MAAS_DBNAME=maas
-#    depends_on:
-#      - maas-db
-#    volumes:
-#      - /mnt/stones/water/maas_images:/var/lib/maas/boot-resources
-#      - /mnt/stones/wind/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
-#    networks:
-#      default:           # Connect to the internal bridge for DB access/Internet
-#      imaging_vlan60:    # Connect to the physical wire for PXE/DHCP
-#        ipv4_address: 192.168.60.2
-#    ports:
-#      - "5240:5240"
+      - /mnt/stones/wind/infrastructure/docker/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
+  grafana:
+    image: grafana/grafana:latest  # The official OSS image
+    container_name: sddc-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_admin_pass
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=grafana.ethicalitllc.com
+      - GF_SERVER_ROOT_URL=https://grafana.ethicalitllc.com/
+      - GF_SERVER_HTTP_PORT=3000
+      - GF_SERVER_PROTOCOL=http
+    volumes:
+      - /mnt/stones/earth/grafana_data:/var/lib/grafana
+      - /mnt/stones/wind/infrastructure/docker/secrets/grafana_admin_pass:/run/secrets/grafana_admin_pass:ro
 networks:
   imaging_vlan60:
     driver: macvlan
@@ -123,4 +118,4 @@ networks:
     ipam:
       config:
         - subnet: 192.168.60.0/24
-          gateway: 192.168.60.1
+          gateway: 192.168.60.254
