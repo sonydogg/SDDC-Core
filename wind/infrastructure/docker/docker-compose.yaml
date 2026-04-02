@@ -94,6 +94,9 @@ services:
     volumes:
       - /mnt/stones/earth/maas_db:/var/lib/postgresql/data
       - /mnt/stones/wind/infrastructure/docker/secrets/maas_db_pass:/run/secrets/maas_db_pass:ro
+    networks:
+      imaging_vlan60:
+        ipv4_address: 192.168.60.20
   grafana:
     image: grafana/grafana:latest  # The official OSS image
     container_name: sddc-grafana
@@ -114,7 +117,7 @@ networks:
   imaging_vlan60:
     driver: macvlan
     driver_opts:
-      parent: vlan60 # <--- The VLAN sub-interface
+      parent: br60 # <--- The VLAN60 bridge on the KVM host aka mini-me-intel-01
     ipam:
       config:
         - subnet: 192.168.60.0/24
