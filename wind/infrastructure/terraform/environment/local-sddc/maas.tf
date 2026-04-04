@@ -73,6 +73,7 @@ resource "libvirt_domain" "maas_controller" {
   vcpu   = 2
   type   = "kvm"
   running = true
+  autostart = true
 
   os = {
     type = "hvm"

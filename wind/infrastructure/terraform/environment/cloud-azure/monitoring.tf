@@ -30,26 +30,32 @@ resource "azurerm_monitor_data_collection_rule" "sddc_dcr" {
       workspace_resource_id = azurerm_log_analytics_workspace.sddc_logs.id
       name                  = "sddc-logs-destination"
     }
+
+    azure_monitor_metrics {
+      name = "sddc-metrics-destination"
+    }
   }
+
   data_flow {
-    destinations       = ["sddc-logs-destination"]
-    output_stream      = "Microsoft-Perf"
-    streams            = ["Microsoft-Perf"]
-    transform_kql      = "source"
+    destinations       = ["sddc-metrics-destination"]
+    output_stream      = "Microsoft-InsightsMetrics"
+    streams            = ["Microsoft-InsightsMetrics"]
   }
+
   data_flow {
     destinations       = ["sddc-logs-destination"]
     output_stream      = "Microsoft-Syslog"
     streams            = ["Microsoft-Syslog"]
-    transform_kql      = "source"
   }
+
   data_sources {
     performance_counter {
       counter_specifiers            = ["Processor(*)\\% Processor Time", "Processor(*)\\% Idle Time", "Processor(*)\\% User Time", "Processor(*)\\% Nice Time", "Processor(*)\\% Privileged Time", "Processor(*)\\% IO Wait Time", "Processor(*)\\% Interrupt Time", "Memory(*)\\Available MBytes Memory", "Memory(*)\\% Available Memory", "Memory(*)\\Used Memory MBytes", "Memory(*)\\% Used Memory", "Memory(*)\\Pages/sec", "Memory(*)\\Page Reads/sec", "Memory(*)\\Page Writes/sec", "Memory(*)\\Available MBytes Swap", "Memory(*)\\% Available Swap Space", "Memory(*)\\Used MBytes Swap Space", "Memory(*)\\% Used Swap Space", "Process(*)\\Pct User Time", "Process(*)\\Pct Privileged Time", "Process(*)\\Used Memory", "Process(*)\\Virtual Shared Memory", "Logical Disk(*)\\% Free Inodes", "Logical Disk(*)\\% Used Inodes", "Logical Disk(*)\\Free Megabytes", "Logical Disk(*)\\% Free Space", "Logical Disk(*)\\% Used Space", "Logical Disk(*)\\Logical Disk Bytes/sec", "Logical Disk(*)\\Disk Read Bytes/sec", "Logical Disk(*)\\Disk Write Bytes/sec", "Logical Disk(*)\\Disk Transfers/sec", "Logical Disk(*)\\Disk Reads/sec", "Logical Disk(*)\\Disk Writes/sec", "Network(*)\\Total Bytes Transmitted", "Network(*)\\Total Bytes Received", "Network(*)\\Total Bytes", "Network(*)\\Total Packets Transmitted", "Network(*)\\Total Packets Received", "Network(*)\\Total Rx Errors", "Network(*)\\Total Tx Errors", "Network(*)\\Total Collisions", "System(*)\\Uptime", "System(*)\\Load1", "System(*)\\Load5", "System(*)\\Load15", "System(*)\\Users", "System(*)\\Unique Users", "System(*)\\CPUs", "Processor\\% Processor Time", "Memory\\Available MBytes", "LogicalDisk(*)\\% Free Space", "LogicalDisk(*)\\Free Megabytes"]
       name                          = "perfCounterDataSource60"
       sampling_frequency_in_seconds = 60
-      streams                       = ["Microsoft-Perf"]
+      streams                       = ["Microsoft-InsightsMetrics"]
     }
+    
     syslog {
       facility_names = ["auth", "authpriv", "cron", "daemon", "mark", "kern", "local0"]
       log_levels     = ["Debug", "Info", "Notice", "Warning", "Error", "Critical", "Alert", "Emergency"]

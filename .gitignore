@@ -34,3 +34,4 @@ build/
 *.tfstate
 *.tfstate.backup
 terraform.tfvars
+wind/infrastructure/terraform/environment/local-sddc/tcmpdumpmaas.txt
