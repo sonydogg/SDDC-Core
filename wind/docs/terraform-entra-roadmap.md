@@ -73,9 +73,17 @@ provider "azuread" {
 }
 ```
 > Complete. Pinned Provider block for azuread to 2.53
+
+
 ---
 
 ## Stage 1 — HCL Foundations + Schema Clarity
+
+> I am currently working here. This I must admit is a very good step. There is some clarity that is missing. I am working through it. I have settled on how to use Claude at this momemnt. Using Claude chat in vscode to ideate and Claude CLI to check me on my progress learning.
+
+### Ideation
+
+Since my n8n documentaion automation is working well. I want Claude to act as my PM. There is an agenda here. I am about to embark on a compliacted IaC adoption of multiple Entra/Azure environments. The needs to be tracked and I want to focus on the technicals, not standups or commenting tickets. Claude through n8n mcp could use my Jira create/update flow to act as my PM. To be continued. For now its manual. 
 
 **Status:** 🔲 Not started  
 **Objective:** Solve the `[]` vs `{}` problem permanently. Build the mental model for all future provider work.
