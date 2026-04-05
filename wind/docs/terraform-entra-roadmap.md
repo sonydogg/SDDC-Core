@@ -47,8 +47,13 @@ terraform plan
 | sp-terraform-provision | Resource creation and updates | Directory.ReadWrite.All (scoped) |
 | sp-arc-onboarding | Arc machine onboarding | Azure Arc-specific roles only |
 | sp-grafana-sso | Grafana OIDC/SSO | openid, profile, email |
+| sp-grafana-azure-monitor-connection | Grafana Azure Monitor Connection | subscription 'Hybrid Lab' Read |
 
 > **Rule:** One service principal per concern. Never reuse across pipeline stages. The Terraform provisioning SP should be the only credential that can write to Entra from the pipeline.
+
+### Note for later 4/4/26 8PM
+
+> **shower throughts** Naming convention should be enforced during linting process. As well as permissions. What you see is what you get. I am aligning service princpals to proposed naming convention. My first Terraform target should be mastering the recording of service principals and their permissions. Establish remediation branch. Then the merge from that branch would 'remediate' the nameing and permissions. It allows engineers to know the state.
 
 ### Provider Block Pattern (pin the version)
 
@@ -67,7 +72,7 @@ provider "azuread" {
   # No credentials in code. Ever.
 }
 ```
-
+> Complete. Pinned Provider block for azuread to 2.53
 ---
 
 ## Stage 1 — HCL Foundations + Schema Clarity

@@ -1,8 +1,5 @@
 # Required because this arc server was onboarded manually before the DCR was created. If we don't do this, the AMA agent won't have permissions to send data to the Log Analytics workspace.
-data "azurerm_arc_machine" "intel_01" {
-  name                = "mini-me-intel-01"
-  resource_group_name = var.resource_group_name
-}
+
 resource "azurerm_role_assignment" "arc_metrics_publisher" {
   scope                = azurerm_log_analytics_workspace.sddc_logs.id
   role_definition_name = "Monitoring Metrics Publisher"
