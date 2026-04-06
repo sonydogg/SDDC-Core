@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const results = [];\n// This points specifically to the head_commit where the file lists live\nconst headCommit = $json.body.head_commit;\n\nif (!headCommit) return [];\n\nconst processFiles = (files, action) => {\n  if (!files) return;\n  for (const file of files) {\n    // Only pick up markdown files in the docs folder\n    if (file.startsWith('wind/') && file.endsWith('.md')) {\n      results.push({\n          path: file,\n          action: action,\n          fileName: file.split('/').pop()\n      });\n    }\n  }\n};\n\nprocessFiles(headCommit.added, 'CREATE');\nprocessFiles(headCommit.modified, 'UPDATE');\n\nreturn results;"
+        "jsCode": "const results = [];\n// This points specifically to the head_commit where the file lists live\nconst headCommit = $json.body.head_commit;\n\nif (!headCommit) return [];\n\nconst processFiles = (files, action) => {\n  if (!files) return;\n  for (const file of files) {\n    // Only pick up markdown files in the docs folder\n    if (file.startsWith('wind/ADRs/') && file.endsWith('.md')) {\n      results.push({\n          path: file,\n          action: action,\n          fileName: file.split('/').pop()\n      });\n    }\n  }\n};\n\nprocessFiles(headCommit.added, 'CREATE');\nprocessFiles(headCommit.modified, 'UPDATE');\n\nreturn results;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -93,7 +93,7 @@
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "title", "value": "={{ $node[\"Markdown1\"].json.data.match(/>([\\s\\S]*?)<\\/h1>/)?.[1] \n\n $json.fileName.replace('.md', '') }}" },
+            { "name": "title", "value": "={{ $node[\"Markdown1\"].json.data.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/)?.[1] || $json.fileName.replace('.md', '') }}" },
             { "name": "space-id", "value": "65844" }
           ]
         },
@@ -226,7 +226,7 @@
             { "name": "title", "value": "={{ $('Markdown1').item.json.data.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/)?.[1] || \"Untitled SDDC Document\" }}" },
             { "name": "status", "value": "current" },
             { "name": "spaceId", "value": "={{\"65844\"}}" },
-            { "name": "body.storage.value", "value": "={{ $('Extract from File1').item.json.data }}" },
+            { "name": "body.storage.value", "value": "={{ $('Markdown1').item.json.data }}" },
             { "name": "body.storage.representation", "value": "storage" }
           ]
         },

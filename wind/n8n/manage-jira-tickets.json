@@ -92,7 +92,11 @@
         "issueType": { "__rl": true, "value": "10008", "mode": "list", "cachedResultName": "Story" },
         "summary": "={{ $json.summary }}",
         "additionalFields": {
-          "description": "={{ $json.description }}"
+          "description": "={{ $json.description }}",
+          "timeTracking": {
+            "originalEstimate": "={{ $json.originalEstimate }}",
+            "remainingEstimate": "={{ $json.originalEstimate }}"
+          }
         }
       },
       "credentials": {
@@ -110,7 +114,11 @@
         "issueKey": "={{ $json.issueKey }}",
         "updateFields": {
           "summary": "={{ $json.summary }}",
-          "description": "={{ $json.description }}"
+          "description": "={{ $json.description }}",
+          "timeTracking": {
+            "originalEstimate": "={{ $json.originalEstimate }}",
+            "remainingEstimate": "={{ $json.originalEstimate }}"
+          }
         }
       },
       "credentials": {
