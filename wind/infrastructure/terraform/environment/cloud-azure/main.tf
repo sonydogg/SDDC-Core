@@ -1,38 +1,16 @@
 data "azurerm_arc_machine" "intel_01" {
   name                = "mini-me-intel-01"
   resource_group_name = var.resource_group_name
-}# The "Ear" - Where logs and metrics will live
+}
 
+# The "Ear" - Where logs and metrics will live
 
 resource "azurerm_log_analytics_workspace" "sddc_logs" {
   name                = "sddc-logs"
-  location            = "${var.location}" # Or your preferred region
-  resource_group_name = "SDDC"
+  location            = var.location # Or your preferred region
+  resource_group_name = var.resource_group_name
   sku                 = "PerGB2018" # The "Pay-as-you-go" / Free Tier compatible SKU
   retention_in_days   = 30
-}
-
-# Azure Monitor Workspace
-resource "azurerm_monitor_workspace" "sddc_monitor" {
-  name                = "sddc-monitor"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-}
-# Required because this arc server was onboarded manually before the DCR was created. If we don't do this, the AMA agent won't have permissions to send data to the Log Analytics workspace.
-
-resource "azurerm_role_assignment" "arc_metrics_publisher" {
-  scope                = azurerm_log_analytics_workspace.sddc_logs.id
-  role_definition_name = "Monitoring Metrics Publisher"
-  principal_id         = data.azurerm_arc_machine.intel_01.identity[0].principal_id
-}
-
-# 1. Install the AMA Extension on the Intel Mini
-resource "azurerm_arc_machine_extension" "ama" {
-  name                 = "AzureMonitorLinuxAgent"
-  arc_machine_id       = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.HybridCompute/machines/mini-me-intel-01"
-  location             = var.location
-  publisher            = "Microsoft.Azure.Monitor"
-  type                 = "AzureMonitorLinuxAgent"
 }
 
 # The "Update Manager" Policy
@@ -47,14 +25,15 @@ resource "azurerm_resource_group_policy_assignment" "enable_update_manager" {
   location             = var.location
 
   identity {
-  type = "SystemAssigned"
-}
-parameters = jsonencode({
-    "assessmentMode" = {
-      "value" = "AutomaticByPlatform"
-    }
-  })
-} 
+    type = "SystemAssigned"
+  }
+
+  parameters = jsonencode({
+      "assessmentMode" = {
+        "value" = "AutomaticByPlatform"
+      }
+    })
+  } 
 
 resource "azurerm_role_assignment" "policy_remediation_role" {
   scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"

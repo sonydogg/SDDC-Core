@@ -56,6 +56,8 @@ p4 submit -d "Description"
 git add . && git commit -m "..." && git push origin main
 ```
 
+**Hybrid workflow note:** Perforce is the primary iteration environment. Files are submitted to P4 first during active development, then periodically pulled into Git. As a result, the Git working tree may show uncommitted changes, deleted files, or apparent duplicates that are mid-flight between P4 submit and Git commit. Do not treat these as errors — they reflect normal in-progress state in the hybrid workflow. When reviewing code, ask before assuming something is a bug vs. an uncommitted iteration.
+
 ## Architecture
 
 ### Storage Hierarchy ("Elemental Stones" — ADR-002)
