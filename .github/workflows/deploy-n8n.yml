@@ -48,12 +48,15 @@ jobs:
 
             echo "Workflow ID: $WORKFLOW_ID"
 
+            # Strip fields that are read-only or not accepted by the n8n API
+            PAYLOAD=$(jq 'del(.id, .description)' "$FILE")
+
             HTTP_STATUS=$(curl -s -o /tmp/n8n_response.json -w "%{http_code}" \
               -X PUT \
               "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID" \
               -H "X-N8N-API-KEY: $N8N_API_KEY" \
               -H "Content-Type: application/json" \
-              --data @"$FILE")
+              --data "$PAYLOAD")
 
             if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
               echo "SUCCESS ($HTTP_STATUS): $FILE deployed"
