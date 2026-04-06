@@ -1,0 +1,67 @@
+name: Deploy n8n Workflows
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "wind/n8n/*.json"
+
+jobs:
+  deploy:
+    name: Push changed workflows to n8n
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # need parent commit to detect changed files
+
+      - name: Detect changed workflow files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only HEAD~1 HEAD -- 'wind/n8n/*.json' | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+          echo "Changed: $FILES"
+
+      - name: Deploy each changed workflow
+        if: steps.changed.outputs.files != ''
+        env:
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+          N8N_BASE_URL: ${{ secrets.N8N_BASE_URL }}
+        run: |
+          FAILED=0
+
+          for FILE in ${{ steps.changed.outputs.files }}; do
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "Deploying: $FILE"
+
+            # Extract workflow id from the JSON file
+            WORKFLOW_ID=$(jq -r '.id' "$FILE")
+
+            if [ -z "$WORKFLOW_ID" ] || [ "$WORKFLOW_ID" = "null" ]; then
+              echo "ERROR: No 'id' field found in $FILE — skipping"
+              FAILED=1
+              continue
+            fi
+
+            echo "Workflow ID: $WORKFLOW_ID"
+
+            HTTP_STATUS=$(curl -s -o /tmp/n8n_response.json -w "%{http_code}" \
+              -X PUT \
+              "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID" \
+              -H "X-N8N-API-KEY: $N8N_API_KEY" \
+              -H "Content-Type: application/json" \
+              --data @"$FILE")
+
+            if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+              echo "SUCCESS ($HTTP_STATUS): $FILE deployed"
+            else
+              echo "FAILED ($HTTP_STATUS): $FILE"
+              cat /tmp/n8n_response.json
+              FAILED=1
+            fi
+          done
+
+          exit $FAILED
