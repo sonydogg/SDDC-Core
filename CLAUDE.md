@@ -58,6 +58,8 @@ git add . && git commit -m "..." && git push origin main
 
 **Hybrid workflow note:** Perforce is the primary iteration environment. Files are submitted to P4 first during active development, then periodically pulled into Git. As a result, the Git working tree may show uncommitted changes, deleted files, or apparent duplicates that are mid-flight between P4 submit and Git commit. Do not treat these as errors — they reflect normal in-progress state in the hybrid workflow. When reviewing code, ask before assuming something is a bug vs. an uncommitted iteration.
 
+**Claude editing protocol:** Perforce sets files to read-only after submit. Before using any Edit or Write tool on a file inside `wind/`, Claude must first run `p4 edit <file_path>` via Bash to unlock it. Do not attempt to edit a `wind/` file without running `p4 edit` first. After edits are complete, Claude stops — Trevor reviews and runs `p4 submit -d "description"` to re-lock and record in P4 history before committing to Git.
+
 ## Architecture
 
 ### Storage Hierarchy ("Elemental Stones" — ADR-002)

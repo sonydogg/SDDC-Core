@@ -1,0 +1,276 @@
+{
+  "id": "gRCCOeYcghGyiaOS",
+  "name": "Smart Documentation",
+  "nodes": [
+    {
+      "parameters": {
+        "owner": { "__rl": true, "value": "https://github.com/sonydogg/SDDC-Core", "mode": "url" },
+        "repository": { "__rl": true, "value": "SDDC-Core", "mode": "list", "cachedResultName": "SDDC-Core", "cachedResultUrl": "https://github.com/sonydogg/SDDC-Core" },
+        "events": ["push"],
+        "options": { "insecureSSL": false }
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [-224, 16],
+      "id": "b632302e-efe0-44b7-952b-5c686a98c21b",
+      "name": "GitHub Trigger",
+      "webhookId": "0c0c07fd-7121-4e4d-b4cd-6d999c64a08c",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "notify",
+        "service": "mobile_app_gfdf",
+        "serviceAttributes": { "attributes": [{}] }
+      },
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [0, 144],
+      "id": "27b9ae7c-3709-42f5-b219-4999debfb401",
+      "name": "Call a service"
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\n// This points specifically to the head_commit where the file lists live\nconst headCommit = $json.body.head_commit;\n\nif (!headCommit) return [];\n\nconst processFiles = (files, action) => {\n  if (!files) return;\n  for (const file of files) {\n    // Only pick up markdown files in the docs folder\n    if (file.startsWith('wind/') && file.endsWith('.md')) {\n      results.push({\n          path: file,\n          action: action,\n          fileName: file.split('/').pop()\n      });\n    }\n  }\n};\n\nprocessFiles(headCommit.added, 'CREATE');\nprocessFiles(headCommit.modified, 'UPDATE');\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "id": "e8c506c9-bc47-4bd7-9d5c-1b359e14c7ce",
+      "name": "MAC Filter"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [896, 96],
+      "id": "3097bbd8-29e9-44b7-bc4e-f775617a5623",
+      "name": "Markdown1"
+    },
+    {
+      "parameters": { "operation": "text", "options": {} },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [688, 96],
+      "id": "6b446091-5893-43cd-ad18-f9fd63ff04f6",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ethicalitllc.atlassian.net/wiki/api/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "title", "value": "={{ $json.data.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/)?.[1] || \"Untitled SDDC Document\" }}" },
+            { "name": "status", "value": "current" },
+            { "name": "spaceId", "value": "={{\"65844\"}}" },
+            { "name": "body.storage.value", "value": "={{ $json.data }}" },
+            { "name": "body.storage.representation", "value": "storage" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1072, -112],
+      "id": "09ff86b4-fdce-447b-a7fc-d5516af8aac2",
+      "name": "Create Confluence Doc"
+    },
+    {
+      "parameters": {
+        "url": "https://ethicalitllc.atlassian.net/wiki/api/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "title", "value": "={{ $node[\"Markdown1\"].json.data.match(/>([\\s\\S]*?)<\\/h1>/)?.[1] \n\n $json.fileName.replace('.md', '') }}" },
+            { "name": "space-id", "value": "65844" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1072, 96],
+      "id": "8029a76e-1021-49ec-b7e3-b2e30e015342",
+      "name": "Search Confluence for Doc & Version"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://ethicalitllc.atlassian.net/wiki/api/v2/pages/{{ $json.pageId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"id\": \"{{ $node[\"Set Version, Title, PageID\"].json.pageId }}\",\n  \"status\": \"current\",\n  \"title\": \"{{ $node[\"Set Version, Title, PageID\"].json.title }}\",\n  \"body\": {\n    \"value\": {{ JSON.stringify($node[\"Markdown1\"].json.data) }},\n    \"representation\": \"storage\"\n  },\n  \"version\": {\n    \"number\": {{ $node[\"Set Version, Title, PageID\"].json.nextVersion }},\n    \"message\": \"Automated GitOps Update\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1680, 112],
+      "id": "6ae14344-988d-4454-8a74-2b6c362efbe2",
+      "name": "Update Confluence Doc"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "value": "https://github.com/sonydogg/SDDC-COre.git", "mode": "url" },
+        "repository": { "__rl": true, "value": "SDDC-Core", "mode": "list", "cachedResultName": "SDDC-Core", "cachedResultUrl": "https://github.com/sonydogg/SDDC-Core" },
+        "filePath": "={{ $json.path }}",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [496, 96],
+      "id": "5cb0e636-8076-40b5-8224-e3ac8e1d2842",
+      "name": "GitHub Get File - Update",
+      "webhookId": "41148fd7-e035-425a-bc47-884ce38e87ee"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  pageId: $json.results[0].id,\n  nextVersion: $json.results[0].version.number + 1,\n  title: $json.results[0].title\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1456, 112],
+      "id": "2867bd2d-74ad-41f7-81fe-5a7be560218d",
+      "name": "Set Version, Title, PageID"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "conditions": [{ "id": "b92b9706-9656-473c-9706-b6cbd74693b5", "leftValue": "={{ $json.action }}", "rightValue": "=CREATE", "operator": { "type": "string", "operation": "contains" } }],
+          "combinator": "and"
+        },
+        "options": { "ignoreCase": false }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [224, 0],
+      "id": "354efc44-7be9-4aa5-8c7c-5b24c5ae7d8f",
+      "name": "If"
+    },
+    {
+      "parameters": { "operation": "text", "options": {} },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [688, -112],
+      "id": "21a779f5-a836-4b18-ada1-f37ff451fba3",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [896, -112],
+      "id": "ff8e8628-6792-4437-bee8-1ee5f09d9389",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": { "__rl": true, "value": "https://github.com/sonydogg/SDDC-COre.git", "mode": "url" },
+        "repository": { "__rl": true, "value": "SDDC-Core", "mode": "list", "cachedResultName": "SDDC-Core", "cachedResultUrl": "https://github.com/sonydogg/SDDC-Core" },
+        "filePath": "={{ $json.path }}",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [496, -112],
+      "id": "5f26fd7e-008c-4bed-adaf-732370b6eca7",
+      "name": "GitHub Get File",
+      "webhookId": "41148fd7-e035-425a-bc47-884ce38e87ee"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "conditions": [{ "id": "b92b9706-9656-473c-9706-b6cbd74693b5", "leftValue": "={{ $json.results }}", "rightValue": "=null", "operator": { "type": "array", "operation": "empty", "singleValue": true } }],
+          "combinator": "and"
+        },
+        "options": { "ignoreCase": false }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [1232, 96],
+      "id": "343f622a-0c5b-43f8-9602-5fb6db2cbe60",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ethicalitllc.atlassian.net/wiki/api/v2/pages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "title", "value": "={{ $('Markdown1').item.json.data.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/)?.[1] || \"Untitled SDDC Document\" }}" },
+            { "name": "status", "value": "current" },
+            { "name": "spaceId", "value": "={{\"65844\"}}" },
+            { "name": "body.storage.value", "value": "={{ $('Extract from File1').item.json.data }}" },
+            { "name": "body.storage.representation", "value": "storage" }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1680, -48],
+      "id": "72809411-9c3f-43a5-8167-08a1cd67f1eb",
+      "name": "Create Confluence Doc1"
+    }
+  ],
+  "connections": {
+    "GitHub Trigger": {
+      "main": [
+        [{ "node": "MAC Filter", "type": "main", "index": 0 }],
+        [{ "node": "Call a service", "type": "main", "index": 0 }]
+      ]
+    },
+    "MAC Filter": { "main": [[{ "node": "If", "type": "main", "index": 0 }]] },
+    "Extract from File1": { "main": [[{ "node": "Markdown1", "type": "main", "index": 0 }]] },
+    "Markdown1": { "main": [[{ "node": "Search Confluence for Doc & Version", "type": "main", "index": 0 }]] },
+    "Search Confluence for Doc & Version": { "main": [[{ "node": "If1", "type": "main", "index": 0 }]] },
+    "GitHub Get File - Update": { "main": [[{ "node": "Extract from File1", "type": "main", "index": 0 }]] },
+    "Set Version, Title, PageID": { "main": [[{ "node": "Update Confluence Doc", "type": "main", "index": 0 }]] },
+    "If": {
+      "main": [
+        [{ "node": "GitHub Get File", "type": "main", "index": 0 }],
+        [{ "node": "GitHub Get File - Update", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract from File": { "main": [[{ "node": "Markdown", "type": "main", "index": 0 }]] },
+    "GitHub Get File": { "main": [[{ "node": "Extract from File", "type": "main", "index": 0 }]] },
+    "Markdown": { "main": [[{ "node": "Create Confluence Doc", "type": "main", "index": 0 }]] },
+    "If1": {
+      "main": [
+        [{ "node": "Create Confluence Doc1", "type": "main", "index": 0 }],
+        [{ "node": "Set Version, Title, PageID", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  }
+}

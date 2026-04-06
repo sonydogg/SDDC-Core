@@ -7,7 +7,6 @@ user-data*
 network-config*
 
 # Ignore Docker Container Volumes
-n8n*
 proxy*
 
 # Ignore OS files

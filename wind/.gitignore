@@ -5,7 +5,6 @@ secrets/
 .p4ignore
 
 # Ignore Docker Container Volumes
-n8n*
 proxy*
 
 # Ignore OS files

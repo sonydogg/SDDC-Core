@@ -1,0 +1,186 @@
+{
+  "id": "2aptMbMcurbztVDO",
+  "name": "Manage Jira Tickets",
+  "description": "Claude PM agent — create, update, transition, and comment on Jira tickets via n8n MCP. Managed via GitOps (wind/n8n/).",
+  "nodes": [
+    {
+      "id": "node-chat-trigger",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [-1100, 0],
+      "parameters": { "options": {} },
+      "webhookId": "8350d2d7-1d2c-488b-87e5-b85fb6c568ff"
+    },
+    {
+      "id": "node-parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-860, 0],
+      "parameters": {
+        "jsCode": "const transitionMap = {\n  'idea': '11',\n  'to do': '21',\n  'todo': '21',\n  'in progress': '31',\n  'in review': '41',\n  'done': '51'\n};\n\nconst raw = $input.first().json.chatInput;\ntry {\n  const parsed = JSON.parse(raw);\n  Object.keys(parsed).forEach(k => {\n    if (parsed[k] === '' || parsed[k] === null || parsed[k] === undefined) {\n      delete parsed[k];\n    }\n  });\n  // Resolve status name to transitionId\n  if (parsed.status) {\n    const key = parsed.status.toLowerCase().trim();\n    const id = transitionMap[key];\n    if (!id) return [{ json: { operation: 'error', message: 'Unknown status: ' + parsed.status } }];\n    parsed.operation = 'transition';\n    parsed.transitionId = id;\n    delete parsed.status;\n  }\n  return [{ json: parsed }];\n} catch(e) {\n  return [{ json: { operation: 'error', message: 'Bad JSON: ' + raw } }];\n}"
+      }
+    },
+    {
+      "id": "node-switch",
+      "name": "Route Operation",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [-620, 0],
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "id": "r1", "leftValue": "={{ $json.operation }}", "rightValue": "create", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "id": "r2", "leftValue": "={{ $json.operation }}", "rightValue": "update", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "update"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "id": "r3", "leftValue": "={{ $json.operation }}", "rightValue": "get", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "get"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "id": "r4", "leftValue": "={{ $json.operation }}", "rightValue": "transition", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "transition"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+                "conditions": [{ "id": "r5", "leftValue": "={{ $json.operation }}", "rightValue": "comment", "operator": { "type": "string", "operation": "equals" } }],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "comment"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-create",
+      "name": "Create Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [-380, -300],
+      "parameters": {
+        "project": { "__rl": true, "value": "10001", "mode": "list", "cachedResultName": "SDDC Core" },
+        "issueType": { "__rl": true, "value": "10008", "mode": "list", "cachedResultName": "Story" },
+        "summary": "={{ $json.summary }}",
+        "additionalFields": {
+          "description": "={{ $json.description }}"
+        }
+      }
+    },
+    {
+      "id": "node-update",
+      "name": "Update Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [-380, -100],
+      "parameters": {
+        "operation": "update",
+        "issueKey": "={{ $json.issueKey }}",
+        "updateFields": {
+          "summary": "={{ $json.summary }}",
+          "description": "={{ $json.description }}"
+        }
+      }
+    },
+    {
+      "id": "node-get",
+      "name": "Get Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [-380, 100],
+      "parameters": {
+        "operation": "get",
+        "issueKey": "={{ $json.issueKey }}",
+        "additionalFields": {}
+      }
+    },
+    {
+      "id": "node-comment",
+      "name": "Add Comment",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [-380, 500],
+      "parameters": {
+        "resource": "issueComment",
+        "operation": "add",
+        "issueKey": "={{ $json.issueKey }}",
+        "comment": "={{ $json.comment }}"
+      }
+    },
+    {
+      "id": "node-transition",
+      "name": "Transition Issue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-380, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ethicalitllc.atlassian.net/rest/api/2/issue/{{ $json.issueKey }}/transitions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "jiraSoftwareCloudApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ transition: { id: $json.transitionId } }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "i4T3TVWgBIG78Hwl",
+          "name": "Jira SW Cloud account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[{ "node": "Parse Input", "type": "main", "index": 0 }]]
+    },
+    "Parse Input": {
+      "main": [[{ "node": "Route Operation", "type": "main", "index": 0 }]]
+    },
+    "Route Operation": {
+      "main": [
+        [{ "node": "Create Issue", "type": "main", "index": 0 }],
+        [{ "node": "Update Issue", "type": "main", "index": 0 }],
+        [{ "node": "Get Issue", "type": "main", "index": 0 }],
+        [{ "node": "Transition Issue", "type": "main", "index": 0 }],
+        [{ "node": "Add Comment", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
