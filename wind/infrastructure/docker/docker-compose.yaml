@@ -114,15 +114,16 @@ services:
       - /mnt/stones/earth/grafana_data:/var/lib/grafana
       - /mnt/stones/wind/infrastructure/docker/secrets/grafana_admin_pass:/run/secrets/grafana_admin_pass:ro
   github-runner:
-    image: ghcr.io/actions/actions-runner:latest
+    image: myoung34/github-runner:latest
+    container_name: sddc-github-runner
     environment:
       - REPO_URL=https://github.com/sonydogg/SDDC-Core
       - RUNNER_TOKEN=${GIT_RUNNER}
       - RUNNER_NAME=mini-me-intel-01-runner
       - RUNNER_WORKDIR=/tmp/runner
+      - LABELS=self-hosted,Linux,X64,mini-me-intel-01
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/stones/earth/github_runner:/tmp/runner
 networks:
   imaging_vlan60:
