@@ -1,7 +1,6 @@
 {
   "id": "2aptMbMcurbztVDO",
   "name": "Manage Jira Tickets",
-  "description": "Claude PM Agent —- create, update, transition, and comment on Jira tickets via n8n MCP. Managed via GitOps (wind/n8n/).",
   "nodes": [
     {
       "id": "node-chat-trigger",
