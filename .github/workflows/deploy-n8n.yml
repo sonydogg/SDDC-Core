@@ -23,7 +23,12 @@ jobs:
       - name: Detect changed workflow files
         id: changed
         run: |
-          FILES=$(git diff --name-only HEAD~1 HEAD -- 'wind/n8n/*.json' | tr '\n' ' ')
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            FILES=$(ls wind/n8n/*.json | tr '\n' ' ')
+            echo "Manual dispatch — deploying all workflows"
+          else
+            FILES=$(git diff --name-only HEAD~1 HEAD -- 'wind/n8n/*.json' | tr '\n' ' ')
+          fi
           echo "files=$FILES" >> $GITHUB_OUTPUT
           echo "Changed: $FILES"
 
