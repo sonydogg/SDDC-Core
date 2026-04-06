@@ -58,6 +58,22 @@ jobs:
             # Strip fields that are read-only or not accepted by the n8n API
             PAYLOAD=$(jq 'del(.id, .description) | del(.settings.binaryMode)' "$FILE")
 
+            # Fetch live workflow to preserve configured credentials (keyed by node name)
+            CURRENT=$(curl -s "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID" \
+              -H "X-N8N-API-KEY: $N8N_API_KEY")
+
+            PAYLOAD=$(echo "$PAYLOAD" | jq --argjson current "$CURRENT" '
+              .nodes |= map(
+                . as $node |
+                ($current.nodes // [] | map(select(.name == $node.name)) | first) as $live |
+                if $live and $live.credentials then
+                  .credentials = $live.credentials
+                else
+                  .
+                end
+              )
+            ')
+
             # Deactivate before updating to avoid publish validation errors
             curl -s -o /dev/null -X POST \
               "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID/deactivate" \
@@ -73,10 +89,15 @@ jobs:
             if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
               echo "SUCCESS ($HTTP_STATUS): $FILE deployed"
               # Reactivate
-              curl -s -o /dev/null -X POST \
+              ACTIVATE_STATUS=$(curl -s -o /tmp/n8n_activate.json -w "%{http_code}" -X POST \
                 "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID/activate" \
-                -H "X-N8N-API-KEY: $N8N_API_KEY"
-              echo "Reactivated: $WORKFLOW_ID"
+                -H "X-N8N-API-KEY: $N8N_API_KEY")
+              if [ "$ACTIVATE_STATUS" -ge 200 ] && [ "$ACTIVATE_STATUS" -lt 300 ]; then
+                echo "Reactivated: $WORKFLOW_ID"
+              else
+                echo "WARNING: Reactivate failed ($ACTIVATE_STATUS) for $WORKFLOW_ID"
+                cat /tmp/n8n_activate.json
+              fi
             else
               echo "FAILED ($HTTP_STATUS): $FILE"
               cat /tmp/n8n_response.json
