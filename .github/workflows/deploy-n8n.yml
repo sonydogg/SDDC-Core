@@ -51,6 +51,11 @@ jobs:
             # Strip fields that are read-only or not accepted by the n8n API
             PAYLOAD=$(jq 'del(.id, .description)' "$FILE")
 
+            # Deactivate before updating to avoid publish validation errors
+            curl -s -o /dev/null -X POST \
+              "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID/deactivate" \
+              -H "X-N8N-API-KEY: $N8N_API_KEY"
+
             HTTP_STATUS=$(curl -s -o /tmp/n8n_response.json -w "%{http_code}" \
               -X PUT \
               "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID" \
@@ -60,6 +65,11 @@ jobs:
 
             if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
               echo "SUCCESS ($HTTP_STATUS): $FILE deployed"
+              # Reactivate
+              curl -s -o /dev/null -X POST \
+                "$N8N_BASE_URL/api/v1/workflows/$WORKFLOW_ID/activate" \
+                -H "X-N8N-API-KEY: $N8N_API_KEY"
+              echo "Reactivated: $WORKFLOW_ID"
             else
               echo "FAILED ($HTTP_STATUS): $FILE"
               cat /tmp/n8n_response.json

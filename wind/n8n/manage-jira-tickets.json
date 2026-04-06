@@ -95,6 +95,9 @@
         "additionalFields": {
           "description": "={{ $json.description }}"
         }
+      },
+      "credentials": {
+        "jiraSoftwareCloudApi": { "id": "i4T3TVWgBIG78Hwl", "name": "Jira SW Cloud account" }
       }
     },
     {
@@ -110,6 +113,9 @@
           "summary": "={{ $json.summary }}",
           "description": "={{ $json.description }}"
         }
+      },
+      "credentials": {
+        "jiraSoftwareCloudApi": { "id": "i4T3TVWgBIG78Hwl", "name": "Jira SW Cloud account" }
       }
     },
     {
@@ -122,6 +128,9 @@
         "operation": "get",
         "issueKey": "={{ $json.issueKey }}",
         "additionalFields": {}
+      },
+      "credentials": {
+        "jiraSoftwareCloudApi": { "id": "i4T3TVWgBIG78Hwl", "name": "Jira SW Cloud account" }
       }
     },
     {
@@ -135,6 +144,9 @@
         "operation": "add",
         "issueKey": "={{ $json.issueKey }}",
         "comment": "={{ $json.comment }}"
+      },
+      "credentials": {
+        "jiraSoftwareCloudApi": { "id": "i4T3TVWgBIG78Hwl", "name": "Jira SW Cloud account" }
       }
     },
     {
