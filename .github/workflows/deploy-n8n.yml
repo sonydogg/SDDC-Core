@@ -10,7 +10,8 @@ on:
 jobs:
   deploy:
     name: Push changed workflows to n8n
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    environment: production  # requires manual approval
 
     steps:
       - name: Checkout repository
