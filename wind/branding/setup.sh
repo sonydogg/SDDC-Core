@@ -2,7 +2,7 @@
 set -e
 
 # --- 1. Environment Validation ---
-if [[ -z "$SP_ID" || -z "$SP_SECRET" || -z "$AZURE_TENANT_ID" ]]; then
+if [[ -z "$SP_ID" || -z "$SP_SECRET" || -z "$AZURE_TENANT_ID" || -z "$AZURE_SUBSCRIPTION_ID" ]]; then
     echo "❌ ERROR: Missing Azure Service Principal variables (SP_ID, SP_SECRET, or AZURE_TENANT_ID)."
     exit 1
 fi
@@ -14,7 +14,7 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 wget https://aka.ms/azcmagent -O ~/Install_linux_azcmagent.sh
 sudo bash ~/Install_linux_azcmagent.sh
 
-# 2. Add user to identity group
+# 2. Add user to identity group (must come after agent install — himds group created by installer)
 sudo usermod -aG himds $USER
 
 # --- 3. Management Plane Onboarding ---
@@ -23,12 +23,12 @@ sudo azcmagent connect \
   --service-principal-id "$SP_ID" \
   --service-principal-secret "$SP_SECRET" \
   --tenant-id "$AZURE_TENANT_ID" \
-  --subscription-id "44be4360-5ab3-4c8c-a4aa-a28245851e3f" \
+  --subscription-id "$AZURE_SUBSCRIPTION_ID" \
   --resource-group "SDDC" \
   --location "eastus" \
   --verbose
 
-# --- 4. Repo Setup (Docker & Perforce) ---
+# --- 4. Repo Setup (Docker) ---
 echo "🐳 Configuring Repositories for Noble (24.04)..."
 sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -38,25 +38,14 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" \
   | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-# Perforce GPG & Repo
-curl -fsSL https://package.perforce.com/perforce.pubkey | sudo gpg --dearmor -o /etc/apt/keyrings/perforce.gpg --yes
-echo "deb [signed-by=/etc/apt/keyrings/perforce.gpg] https://package.perforce.com/apt/ubuntu noble release" \
-  | sudo tee /etc/apt/sources.list.d/perforce.list > /dev/null
-
 # --- 5. Install the Cattle Toolkit ---
-echo "🛠️ Installing Docker & Perforce Helix Core..."
+echo "🛠️ Installing Docker"
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin helix-p4d
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # --- 6. Building the Stones ---
 echo "🗺️ Mapping the Stones..."
 sudo mkdir -p /mnt/stones/{fire,water,earth,air}
-sudo mkdir -p /opt/perforce/p4-data
-sudo chown -R sonydogg:sonydogg /mnt/stones /opt/perforce
 sudo usermod -aG docker sonydogg
-
-# --- 7. Final Polish ---
-echo "📦 Pre-pulling Helix Core image..."
-sudo docker pull perforce/helix-core-p4d
 
 echo "✅ Cattle Branding Complete. Mini-Me is now part of the SDDC herd."
