@@ -132,7 +132,7 @@ The AzureAD provider changed dramatically between v2 and v3. Use `~> 2.53` (or y
 
 ## Stage 2 — Entra Read: Import Existing State
 
-**Status:** 🔲 Not started  
+**Status:** 🔄 In progress  
 **Objective:** Map your tenant completely using data sources and import blocks. Touch nothing. Know everything.
 
 ### The Principle
@@ -180,7 +180,15 @@ Available in TF 1.5+. Produces imperfect but useful starter configs from importe
 - https://developer.hashicorp.com/terraform/tutorials/state/state-import
 
 ### Session Notes
-<!-- Add notes here after each working session -->
+
+#### 2026-04-06 — First real apply
+
+- Scaffolded `learning/entra-read/` with four data sources: `azuread_user`, `azuread_group`, `azuread_application`, `azuread_service_principal`
+- Hit 403 — root cause: permissions on the SP were **Delegated** type, not **Application** type. Delegated requires a signed-in user; Terraform authenticates via client credentials with no user context. Application permissions are what automation needs. Green checkmarks in the portal do not distinguish between the two — you have to read the Type column.
+- Added `Application.Read.All`, `Group.Read.All`, `User.Read.All` as Application permissions with admin consent granted. Apply succeeded.
+- Outputs surface to terminal after apply. Re-inspect anytime with `terraform output` or `terraform state show <resource>`. State stored locally in `terraform.tfstate`.
+- Singular vs plural data sources: `azuread_service_principal` (named lookup) vs `azuread_service_principals` with `return_all = true` or a `filter` expression for bulk inventory.
+- Tenant replication pattern: data sources and `terraform state show` get you IDs and shape. For full config extraction, import the object then run `terraform plan -generate-config-out=generated.tf` (TF 1.5+). Object IDs are tenant-scoped so you can't copy state — you copy the HCL configuration and apply it to the target tenant, which mints new objects with the same settings.
 
 ---
 
@@ -319,8 +327,9 @@ Wire the alert to n8n, email, or Teams. The pipeline becomes the compliance repo
 ## Session Log
 
 | Date | Stage | Topics Covered | Decisions Made |
-|------|-------|---------------|----------------|
+| --- | --- | --- | --- |
 | 2026-04-04 | Foundation | Roadmap scoped. Auth strategy resolved. ARM variable override pattern documented. SP inventory approach established. | Use `sp-terraform-read` for Stage 2 data source work. Source `.env` before every Terraform run. Pin AzureAD provider at `~> 2.53`. |
+| 2026-04-06 | Stage 2 | First apply against real tenant. Delegated vs Application permissions distinction learned hands-on (403 → fix). Plural data sources for bulk inventory. Tenant replication pattern: import + generate-config-out. | Application permissions required for automation; Delegated requires a signed-in user. `terraform plan -generate-config-out` (TF 1.5+) extracts HCL from imported state. |
 
 ---
 

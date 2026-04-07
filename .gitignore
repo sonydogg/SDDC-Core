@@ -35,3 +35,6 @@ build/
 terraform.tfvars
 wind/infrastructure/terraform/environment/local-sddc/tcmpdumpmaas.txt
 CLAUDE.md
+wind/wordblast/
+wind/infrastructure/terraform/learning/
+wind/docs/
