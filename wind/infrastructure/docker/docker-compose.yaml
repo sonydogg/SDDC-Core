@@ -24,11 +24,11 @@ services:
           - /mnt/stones/wind/infrastructure/docker/secrets/p4_admin_pass:/run/secrets/p4_admin_pass:ro
   # The Automation Brain
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:stable
     container_name: sddc-n8n
     restart: always
-    ports:
-      - "5678:5678"
+    expose:
+      - "5678"
     environment:
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=n8n-db
@@ -39,6 +39,7 @@ services:
       # n8n looks for this specific env var for file-based secrets
       - DB_POSTGRESDB_PASSWORD_FILE=/run/secrets/n8n_db_pass
       - N8N_ENCRYPTION_KEY_FILE=/run/secrets/n8n_encryption_key
+      - N8N_TRUSTS_PROXY=true
     depends_on:
       - n8n-db
     volumes:
@@ -98,11 +99,11 @@ services:
       imaging_vlan60:
         ipv4_address: 192.168.60.20
   grafana:
-    image: grafana/grafana:latest  # The official OSS image
+    image: grafana/grafana:13.0.0-24014010820  # The official OSS image
     container_name: sddc-grafana
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_admin_pass
       - GF_USERS_ALLOW_SIGN_UP=false
