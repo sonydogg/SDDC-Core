@@ -1,0 +1,66 @@
+{
+  "id": "UCRnzQYTbMSKCh3n",
+  "name": "Memory Read",
+  "nodes": [
+    {
+      "id": "fe153cfc-5f34-497c-a504-8c347641f281",
+      "name": "Memory Read Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "memory-read",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "59619533-44d5-48e6-b8fd-6c0ace3ef936"
+    },
+    {
+      "id": "2530d6ed-0bf3-4b7f-b18d-0173b1c39e3b",
+      "name": "Read Memory File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [540, 300],
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/home/node/.n8n-files/memory.json"
+      }
+    },
+    {
+      "id": "64922aa3-6ca4-4dad-83da-8a950e747660",
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [840, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst binary = items[0].binary?.data;\nif (!binary) {\n  return [{ json: {} }];\n}\nconst content = Buffer.from(binary.data, 'base64').toString('utf-8');\ntry {\n  return [{ json: JSON.parse(content) }];\n} catch (e) {\n  return [{ json: {} }];\n}"
+      }
+    },
+    {
+      "id": "e275a9d3-b583-4d63-a318-c90e0f9b83d1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1140, 300],
+      "parameters": {
+        "respondWith": "firstIncomingItem"
+      }
+    }
+  ],
+  "connections": {
+    "Memory Read Webhook": {
+      "main": [[{ "node": "Read Memory File", "type": "main", "index": 0 }]]
+    },
+    "Read Memory File": {
+      "main": [[{ "node": "Parse JSON", "type": "main", "index": 0 }]]
+    },
+    "Parse JSON": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}

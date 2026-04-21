@@ -1,0 +1,68 @@
+{
+  "id": "0CHeQ7LKK0hIQvdo",
+  "name": "Memory Write",
+  "nodes": [
+    {
+      "id": "e2d7271f-7822-4715-b41b-bd13e69458b7",
+      "name": "Memory Write Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "memory-write",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "5909e204-8f62-4472-8e7e-5a82254ba7b5"
+    },
+    {
+      "id": "f82cdf5d-e21b-4a5b-be08-0812a7cd42f3",
+      "name": "Prepare Binary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [540, 300],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const body = $input.first().json.body;\nconst jsonString = JSON.stringify(body, null, 2);\nconst buffer = Buffer.from(jsonString, 'utf-8');\nconst binaryData = await $helpers.prepareBinaryData(buffer, 'memory.json', 'application/json');\nreturn [{\n  json: {},\n  binary: { data: binaryData }\n}];"
+      }
+    },
+    {
+      "id": "132de211-8834-41d4-ab4f-9218c1f71a69",
+      "name": "Write Memory File",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [840, 300],
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/.n8n-files/memory.json",
+        "dataPropertyName": "data"
+      }
+    },
+    {
+      "id": "dbcbf3e9-3a29-45ee-bfcf-364e5406529b",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [1140, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": { "success": true }
+      }
+    }
+  ],
+  "connections": {
+    "Memory Write Webhook": {
+      "main": [[{ "node": "Prepare Binary", "type": "main", "index": 0 }]]
+    },
+    "Prepare Binary": {
+      "main": [[{ "node": "Write Memory File", "type": "main", "index": 0 }]]
+    },
+    "Write Memory File": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
