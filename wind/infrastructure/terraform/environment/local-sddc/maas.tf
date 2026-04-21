@@ -96,21 +96,21 @@ resource "libvirt_domain" "maas_controller" {
           type = "qcow2"
         }
       },
-    {
-        source = {
-          file = {
-            file = libvirt_cloudinit_disk.commoninit.path
-          }
-        }
-      target = {
-          dev = "hdb"
-          bus = "ide"
-        }
-      driver = {
-          type = "raw"
-        }
-      device = "cdrom"
-      }
+#    {
+#        source = {
+#          file = {
+#            file = libvirt_cloudinit_disk.commoninit.path
+#          }
+#        }
+#      target = {
+#          dev = "hdb"
+#          bus = "ide"
+#        }
+#      driver = {
+#          type = "raw"
+#        }
+#      device = "cdrom"
+#      }
     ]
     consoles = [
       {
