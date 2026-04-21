@@ -40,10 +40,12 @@ services:
       - DB_POSTGRESDB_PASSWORD_FILE=/run/secrets/n8n_db_pass
       - N8N_ENCRYPTION_KEY_FILE=/run/secrets/n8n_encryption_key
       - N8N_TRUSTS_PROXY=true
+      - N8N_ALLOWED_PATHS=/home/node/.n8n-files,/data/memory
     depends_on:
       - n8n-db
     volumes:
       - /mnt/stones/earth/n8n_data:/home/node/.n8n
+      - /mnt/stones/earth/n8n_memory:/home/node/.n8n-files
       - /mnt/stones/wind/infrastructure/docker/secrets/n8n_db_pass:/run/secrets/n8n_db_pass:ro
       - /mnt/stones/wind/infrastructure/docker/secrets/n8n_encryption_key:/run/secrets/n8n_encryption_key:ro
 
@@ -126,6 +128,23 @@ services:
     restart: unless-stopped
     volumes:
       - /mnt/stones/earth/github_runner:/tmp/runner
+# Mech Central Web Server
+  meshcentral:
+    image: ghcr.io/ylianst/meshcentral:latest
+    container_name: sddc-meshcentral
+    restart: unless-stopped
+    ports:
+      - "8443:443"   # HTTPS
+      - "4433:4433"   # HTTPS (alt)
+    volumes:
+      - /mnt/stones/wind/meshcentral/data:/opt/meshcentral/meshcentral-data
+      - /mnt/stones/wind/meshcentral/files:/opt/meshcentral/meshcentral-files
+    environment:
+      - NODE_ENV=production
+    networks:
+      default:
+      imaging_vlan60:
+        ipv4_address: 192.168.60.30
 networks:
   imaging_vlan60:
     driver: macvlan
