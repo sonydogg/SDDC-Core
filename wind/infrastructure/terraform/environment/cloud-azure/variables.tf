@@ -34,5 +34,9 @@ variable "storage_account" {
   type        = string
   default     = "sddc"
   description = "Storage account for Terraform state"
-  
+}
+
+variable "home_public_ip" {
+  type        = string
+  description = "Current home public IP for TrueNAS storage account firewall rule — update when IP changes after extended power loss"
 }

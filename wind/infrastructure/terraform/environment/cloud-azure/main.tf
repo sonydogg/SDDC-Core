@@ -64,3 +64,17 @@ resource "azurerm_role_assignment" "periodic_assessment_remediation_role" {
   role_definition_name = "Contributor"
   principal_id         = azurerm_resource_group_policy_assignment.periodic_assessment.identity[0].principal_id
 }
+
+resource "azurerm_storage_account" "truenas_offsite_storage" {
+  name                     = "truenasoffsitestorage"
+  resource_group_name      = var.resource_group_name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  network_rules {
+    default_action = "Deny"
+    ip_rules       = [var.home_public_ip] #note periodic updates need to be made as ip changes.
+    bypass         = ["AzureServices"]
+  }
+}
