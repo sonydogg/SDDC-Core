@@ -41,30 +41,6 @@ resource "azurerm_role_assignment" "policy_remediation_role" {
   principal_id         = azurerm_resource_group_policy_assignment.enable_update_manager.identity[0].principal_id
 }
 
-# Periodic Assessment Policy
-# Triggers assessment scans (~every 24h) so Update Manager knows what patches
-# are pending before the maintenance window opens. Without this, compliance
-# visibility is blind between installation windows.
-resource "azurerm_resource_group_policy_assignment" "periodic_assessment" {
-  name                 = "sddc-periodic-assessment"
-  resource_group_id    = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
-  policy_definition_id = "/providers/Microsoft.Authorization/policyDefinitions/59efceea-0c96-497e-a4a1-4eb2290dac15"
-
-  description  = "Enables periodic checking for missing system updates on Arc-enabled servers"
-  display_name = "Periodic Assessment for Arc Servers"
-  location     = var.location
-
-  identity {
-    type = "SystemAssigned"
-  }
-}
-
-resource "azurerm_role_assignment" "periodic_assessment_remediation_role" {
-  scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group_name}"
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_resource_group_policy_assignment.periodic_assessment.identity[0].principal_id
-}
-
 resource "azurerm_storage_account" "truenas_offsite_storage" {
   name                     = "truenasoffsitestorage"
   resource_group_name      = var.resource_group_name

@@ -38,3 +38,7 @@ CLAUDE.md
 wind/wordblast/
 wind/infrastructure/terraform/learning/
 wind/docs/
+*tfplan
+.devcontainer/devcontainer.json
+.gitignore
+.devcontainer/devcontainer-lock.json
