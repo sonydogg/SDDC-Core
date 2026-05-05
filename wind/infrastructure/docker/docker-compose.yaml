@@ -15,8 +15,8 @@ services:
       - PERFORCE_UID=1000
       - PERFORCE_GID=1000
     volumes:
-          # Earth Stone: The Librarian's Brain (DB, Logs, License)
-          - /mnt/stones/earth/p4data:/p4data
+          # Host NVME for better db performance
+          - /opt/perforce/p4data:/p4data
           # Water Stone: The Librarian's Vault (Actual Files/Depots)
           # Note: We map this to a separate root folder in the container
           - /mnt/stones/water/p4depots:/depots
