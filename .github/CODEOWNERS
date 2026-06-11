@@ -1,0 +1,17 @@
+# CODEOWNERS — SDDC-Core
+#
+# All PRs require approval from @sonydogg before merge.
+# This file works in conjunction with the "agent-stop" branch ruleset
+# (ID: 17578680). To enforce CODEOWNERS review, enable
+# "Require review from Code Owners" in the ruleset settings.
+#
+# Pattern → Owner(s)
+# Last matching rule wins.
+
+# Global default — everything requires sonydogg
+*                   @sonydogg
+
+# Infrastructure as code
+terraform/           @sonydogg
+wind/                @sonydogg
+.github/             @sonydogg
