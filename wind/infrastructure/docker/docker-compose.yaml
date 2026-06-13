@@ -121,13 +121,14 @@ services:
     container_name: sddc-github-runner
     environment:
       - REPO_URL=https://github.com/sonydogg/SDDC-Core
-      - RUNNER_TOKEN=${GIT_RUNNER}
+      - ACCESS_TOKEN_FILE=/run/secrets/github_runner_pat
       - RUNNER_NAME=mini-me-intel-01-runner
       - RUNNER_WORKDIR=/tmp/runner
-      - LABELS=self-hosted,Linux,X64,mini-me-intel-01
+      - LABELS=self-hosted,Linux,X64
     restart: unless-stopped
     volumes:
       - /mnt/stones/earth/github_runner:/tmp/runner
+      - /mnt/stones/wind/infrastructure/docker/secrets/github_runner_pat:/run/secrets/github_runner_pat:ro
 # Mech Central Web Server
   meshcentral:
     image: ghcr.io/ylianst/meshcentral:latest
